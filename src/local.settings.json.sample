@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "MAF_PROVIDER": "foundry",
+    "FOUNDRY_PROJECT_ENDPOINT": "",
+    "FOUNDRY_MODEL": "gpt-5.4",
+    "ACA_SESSION_POOL_ENDPOINT": "",
+    "EMAIL_ENABLED": "false",
+    "EMAIL_RECIPIENT": "",
+    "O365_MCP_SERVER_URL": "",
+    "O365_MCP_CLIENT_ID": ""
+  }
+}

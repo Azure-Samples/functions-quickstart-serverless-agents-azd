@@ -150,6 +150,7 @@ activemq-data/
 # Environments
 .env
 .envrc
+.azure/
 .venv
 env/
 venv/
@@ -208,6 +209,15 @@ tempCodeRunnerFile.py
 
 # PyPI configuration file
 .pypirc
+
+# Azure Functions local settings
+local.settings.json
+.python_packages/
+
+# Local Azure storage emulator data
+__azurite_db*__.json
+__blobstorage__/
+__queuestorage__/
 
 # Marimo
 marimo/_static/
