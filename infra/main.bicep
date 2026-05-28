@@ -6,7 +6,7 @@ targetScope = 'subscription'
 param environmentName string
 
 @minLength(1)
-@description('Primary location for all resources. Must support Azure Functions Flex Consumption, ACA session pools, and the default Microsoft Foundry gpt-5.4 Global Standard deployment.')
+@description('Primary location for all resources. Must support Azure Functions Flex Consumption, ACA session pools, and the default Microsoft Foundry gpt-4.1 Global Standard deployment.')
 @allowed([
   'centralus'
   'eastus'
@@ -23,16 +23,16 @@ param environmentName string
 param location string
 
 @description('Optional email recipient for the daily Microsoft blog digest. Leave blank to skip Office 365 Outlook setup and log the digest instead.')
-param emailRecipient string = ''
+param toEmail string = ''
 
 @description('Microsoft Foundry model deployment name.')
-param foundryModel string = 'gpt-5.4'
+param foundryModel string = 'gpt-4.1'
 
 @description('Microsoft Foundry model name.')
-param foundryModelName string = 'gpt-5.4'
+param foundryModelName string = 'gpt-4.1'
 
 @description('Microsoft Foundry model version.')
-param foundryModelVersion string = '2026-03-05'
+param foundryModelVersion string = '2025-04-14'
 
 @description('Microsoft Foundry deployment capacity.')
 param foundryDeploymentCapacity int = 50
@@ -55,7 +55,7 @@ param o365McpClientId string = ''
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
-var emailEnabled = !empty(emailRecipient)
+var emailEnabled = !empty(toEmail)
 var functionAppName = '${abbrs.webSitesFunctions}agents-${resourceToken}'
 var foundryAccountName = 'cog-${resourceToken}'
 var foundryProjectName = '${foundryAccountName}-proj'
@@ -144,13 +144,12 @@ module api './app/api.bicep' = {
     identityId: apiUserAssignedIdentity.outputs.resourceId
     identityClientId: apiUserAssignedIdentity.outputs.clientId
     appSettings: {
-      MAF_PROVIDER: 'foundry'
+      AZURE_FUNCTIONS_AGENTS_PROVIDER: 'foundry'
       FOUNDRY_PROJECT_ENDPOINT: foundry.outputs.projectEndpoint
       FOUNDRY_MODEL: foundry.outputs.modelDeploymentName
       AZURE_CLIENT_ID: apiUserAssignedIdentity.outputs.clientId
       ACA_SESSION_POOL_ENDPOINT: sessionPool.outputs.poolManagementEndpoint
-      EMAIL_ENABLED: emailEnabled ? 'true' : 'false'
-      EMAIL_RECIPIENT: emailRecipient
+      TO_EMAIL: toEmail
       O365_MCP_SERVER_URL: emailEnabled ? office365Connector!.outputs.mcpEndpointUrl : ''
       O365_MCP_CLIENT_ID: o365McpClientId
       ENABLE_MULTIPLATFORM_BUILD: 'true'
@@ -240,8 +239,7 @@ output AZURE_FUNCTION_NAME string = api.outputs.SERVICE_API_NAME
 output FOUNDRY_PROJECT_ENDPOINT string = foundry.outputs.projectEndpoint
 output FOUNDRY_MODEL string = foundry.outputs.modelDeploymentName
 output ACA_SESSION_POOL_ENDPOINT string = sessionPool.outputs.poolManagementEndpoint
-output EMAIL_ENABLED string = emailEnabled ? 'true' : 'false'
-output EMAIL_RECIPIENT string = emailRecipient
+output TO_EMAIL string = toEmail
 output O365_CONNECTOR_GATEWAY_NAME string = emailEnabled ? office365Connector!.outputs.connectorGatewayName : ''
 output O365_CONNECTION_ID string = emailEnabled ? office365Connector!.outputs.connectionId : ''
 output O365_MCP_SERVER_URL string = emailEnabled ? office365Connector!.outputs.mcpEndpointUrl : ''
