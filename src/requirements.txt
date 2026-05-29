@@ -1,1 +1,1 @@
-azurefunctions-agents-runtime @ https://github.com/anthonychu/azure-functions-agents/releases/download/azurefunctions-agents-runtime-v0.0.0.dev6/azurefunctions_agents_runtime-0.0.0.dev6-py3-none-any.whl
+azurefunctions-agents-runtime
