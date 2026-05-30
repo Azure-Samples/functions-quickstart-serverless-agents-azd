@@ -17,4 +17,6 @@ Put together a short, useful digest of about six posts that are worth reading. P
 
 Write it like a thoughtful update to a teammate: start with the main themes you noticed, then list the posts with full links and a quick note about why each one matters. Keep it skimmable and useful, not stiff. If one source is quiet or unavailable, use the best recent posts you can find from the other and briefly say what happened.
 
-If `$TO_EMAIL` is set and the Office 365 Outlook MCP email tool is available, please actually send the digest to `$TO_EMAIL` with the subject `Daily Microsoft Blog Summary` followed by today's date; if you are not sure of the date, get it with Python rather than guessing. The send tool is usually named `office365_SendEmailV2`. Send the best digest you can assemble, even if one source had to be skipped. If email is not configured, the tool is unavailable, or sending fails, return the digest and briefly say what happened so it shows up in the logs.
+The recipient email is `$TO_EMAIL`.
+
+If the email is not an empty string and the Office 365 Outlook MCP email tool is available, please actually send the digest to `$TO_EMAIL` with the subject `Daily Microsoft Blog Summary` followed by today's date; if you are not sure of the date, get it with Python rather than guessing. The send tool is usually named `office365_SendEmailV2`. Send the best digest you can assemble, even if one source had to be skipped. If email is not configured, the tool is unavailable, or sending fails, return the digest and briefly say what happened so it shows up in the logs.
