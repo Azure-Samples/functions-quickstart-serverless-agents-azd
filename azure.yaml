@@ -1,4 +1,6 @@
 name: functions-quickstart-serverless-agents-azd
+metadata:
+  template: functions-quickstart-serverless-agents-azd@0.0.1-beta
 services:
   api:
     project: ./src
