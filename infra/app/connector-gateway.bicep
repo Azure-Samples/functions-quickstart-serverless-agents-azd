@@ -1,6 +1,6 @@
 param connectorGatewayName string
 param connectionName string = 'office365-outlook'
-param mcpServerConfigName string = 'Office-365-Outlook-send-email-only'
+param mcpServerConfigName string = 'o365-outlook-send-email-only'
 param location string = resourceGroup().location
 param tags object = {}
 param managedIdentityPrincipalId string

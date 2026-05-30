@@ -7,6 +7,7 @@ param modelName string = 'gpt-4.1'
 param modelVersion string = '2025-04-14'
 param deploymentCapacity int = 50
 param managedIdentityPrincipalId string
+param deployerPrincipalId string = ''
 
 var cognitiveServicesUserRoleId = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 var cognitiveServicesOpenAiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
@@ -74,6 +75,26 @@ resource foundryOpenAiUserRole 'Microsoft.Authorization/roleAssignments@2022-04-
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAiUserRoleId)
     principalId: managedIdentityPrincipalId
     principalType: 'ServicePrincipal'
+  }
+}
+
+resource foundryDeployerCognitiveServicesUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(deployerPrincipalId)) {
+  name: guid(foundryAccount.id, deployerPrincipalId, cognitiveServicesUserRoleId)
+  scope: foundryAccount
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesUserRoleId)
+    principalId: deployerPrincipalId
+    principalType: 'User'
+  }
+}
+
+resource foundryDeployerOpenAiUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(deployerPrincipalId)) {
+  name: guid(foundryAccount.id, deployerPrincipalId, cognitiveServicesOpenAiUserRoleId)
+  scope: foundryAccount
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAiUserRoleId)
+    principalId: deployerPrincipalId
+    principalType: 'User'
   }
 }
 

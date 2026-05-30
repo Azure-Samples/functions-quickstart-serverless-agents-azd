@@ -35,7 +35,27 @@ param foundryModelName string = 'gpt-4.1'
 param foundryModelVersion string = '2025-04-14'
 
 @description('Microsoft Foundry deployment capacity.')
-param foundryDeploymentCapacity int = 50
+param foundryDeploymentCapacity int = 200
+
+@description('Optional reasoning effort for supported Foundry reasoning models. Leave empty for older models such as gpt-4.1, which do not support reasoning settings.')
+@allowed([
+  ''
+  'none'
+  'low'
+  'medium'
+  'high'
+  'xhigh'
+])
+param reasoningEffort string = ''
+
+@description('Reasoning summary mode for supported Foundry reasoning models. Only used when reasoningEffort is set.')
+@allowed([
+  ''
+  'auto'
+  'concise'
+  'detailed'
+])
+param reasoningSummary string = 'concise'
 
 @description('Connector Gateway location. Defaults to westcentralus because connector gateway preview features are known to work there while rollout continues.')
 @allowed([
@@ -63,8 +83,12 @@ var deploymentStorageContainerName = 'app-package-${take(functionAppName, 32)}-$
 var deployerPrincipalId = deployer().objectId
 var connectorGatewayName = 'cg-${resourceToken}'
 var office365ConnectionName = 'office365-outlook'
-var office365McpServerConfigName = 'Office-365-Outlook-send-email-only'
+var office365McpServerConfigName = 'o365-outlook-send-email-only'
 var sessionPoolName = 'sessionpool${resourceToken}'
+var reasoningAppSettings = !empty(reasoningEffort) ? {
+  AZURE_FUNCTIONS_AGENTS_REASONING_EFFORT: reasoningEffort
+  AZURE_FUNCTIONS_AGENTS_REASONING_SUMMARY: empty(reasoningSummary) ? 'concise' : reasoningSummary
+} : {}
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: '${abbrs.resourcesResourceGroups}${environmentName}'
@@ -95,6 +119,7 @@ module foundry './app/foundry.bicep' = {
     modelVersion: foundryModelVersion
     deploymentCapacity: foundryDeploymentCapacity
     managedIdentityPrincipalId: apiUserAssignedIdentity.outputs.principalId
+    deployerPrincipalId: deployerPrincipalId
   }
 }
 
@@ -143,7 +168,7 @@ module api './app/api.bicep' = {
     deploymentStorageContainerName: deploymentStorageContainerName
     identityId: apiUserAssignedIdentity.outputs.resourceId
     identityClientId: apiUserAssignedIdentity.outputs.clientId
-    appSettings: {
+    appSettings: union({
       AZURE_FUNCTIONS_AGENTS_PROVIDER: 'foundry'
       FOUNDRY_PROJECT_ENDPOINT: foundry.outputs.projectEndpoint
       FOUNDRY_MODEL: foundry.outputs.modelDeploymentName
@@ -153,8 +178,7 @@ module api './app/api.bicep' = {
       O365_MCP_SERVER_URL: emailEnabled ? office365Connector!.outputs.mcpEndpointUrl : ''
       O365_MCP_CLIENT_ID: o365McpClientId
       ENABLE_MULTIPLATFORM_BUILD: 'true'
-      PYTHON_ENABLE_INIT_INDEXING: '1'
-    }
+    }, reasoningAppSettings)
   }
 }
 
@@ -187,6 +211,7 @@ module rbac './app/rbac.bicep' = {
     storageAccountName: storage.outputs.name
     appInsightsName: monitoring.outputs.name
     managedIdentityPrincipalId: apiUserAssignedIdentity.outputs.principalId
+    deployerPrincipalId: deployerPrincipalId
   }
 }
 

@@ -53,7 +53,17 @@ To enable email delivery, set `TO_EMAIL` before running `azd up`:
 azd env set TO_EMAIL you@example.com
 ```
 
-When email delivery is enabled, `azd up` provisions an Office 365 Outlook connection and MCP server. After deployment, authenticate the connection in the Azure portal before expecting the timer agent to send email.
+When email delivery is enabled, `azd up` provisions an Office 365 Outlook connection and MCP server. After deployment, authenticate the connection in the Connector Namespace portal before expecting the timer agent to send email.
+
+Open the Connector Namespace portal from the deployed environment:
+
+```bash
+CONNECTOR_PORTAL_URL="https://connectors.azure.com/$(az account show --query id -o tsv)/rg-$(azd env get-value AZURE_ENV_NAME)/$(azd env get-value O365_CONNECTOR_GATEWAY_NAME)/overview"
+echo "$CONNECTOR_PORTAL_URL"
+open "$CONNECTOR_PORTAL_URL"
+```
+
+Use the `connectors.azure.com` URL for authorization, not the generic Azure portal resource URL.
 
 ## Deploy to Azure
 
@@ -71,6 +81,13 @@ The deployment creates:
 - A Microsoft Foundry account, project, and `gpt-4.1` deployment
 - An Azure Container Apps dynamic session pool
 - Optional Office 365 Outlook Connector Gateway resources, when `TO_EMAIL` is set
+
+The scaffold defaults to `gpt-4.1`, `FOUNDRY_DEPLOYMENT_CAPACITY=200`, and no reasoning settings.
+If you intentionally upgrade to a reasoning-capable model such as `gpt-5.4`, set the Foundry model
+parameters and `AZURE_FUNCTIONS_AGENTS_REASONING_EFFORT`/`AZURE_FUNCTIONS_AGENTS_REASONING_SUMMARY`
+together. If your subscription has less remaining quota than the default capacity, lower
+`FOUNDRY_DEPLOYMENT_CAPACITY` or choose another region/SKU/model. Use reasoning effort `medium` by
+default; raise it to `high` and increase capacity when the agent needs deeper reasoning.
 
 After deployment, `azd` stores output values in your local environment. You can review them with:
 

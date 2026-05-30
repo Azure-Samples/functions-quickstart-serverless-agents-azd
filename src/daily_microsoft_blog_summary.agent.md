@@ -6,8 +6,6 @@ trigger:
   type: timer_trigger
   args:
     schedule: "0 0 15 * * *"
-
-mcp: true
 ---
 
 You are helping me keep up with Microsoft developer and Azure app platform updates. Once a day, please look for recent posts from these places:
