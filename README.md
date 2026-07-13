@@ -113,6 +113,25 @@ When `TO_EMAIL` is blank, the timer agent does not try to send email. It returns
 
 When `TO_EMAIL` is set and the Office 365 connection is authenticated, the timer agent sends the digest to that recipient using the Office 365 Outlook MCP tool.
 
+## Observability
+
+The app depends on `azurefunctions-agents-runtime[monitor]`, so Application Insights observability is enabled by default in the deployed sample. No telemetry code is required in `function_app.py`. When the runtime detects both the `[monitor]` extra and the `APPLICATIONINSIGHTS_CONNECTION_STRING` app setting (provisioned automatically by this sample's Bicep), it configures OpenTelemetry export to Azure Monitor and instruments the agent with Microsoft Agent Framework (MAF) gen_ai instrumentation.
+
+The runtime emits two span types, both recorded as dependency spans:
+
+- `agent.run {name}`: one span per agent invocation, capturing the trigger type, model, session id, tool-call count, and outcome.
+- `dynamic_session.execute`: one span per `execute_python` dynamic-sessions call, capturing the session id, whether stderr was produced, and the Azure Container Apps operation correlation.
+
+In the Azure portal, view these spans in your Application Insights resource under Transaction Search or the end-to-end transaction view, not the Logs/AppTraces blade.
+
+Runtime-added attributes use the `af.` prefix (standard OpenTelemetry attributes like `server.address` are reused as-is). If a call fails, the span is tagged with `af.fault_domain`, set to one of `app`, `runtime`, `platform`, `model`, `connector`, `sandbox`, or `unknown`. A `dynamic_session.execute` call that returns non-empty stderr, or raises, is marked as an error span with `af.fault_domain=sandbox`. These sandbox failures remain visible in Application Insights even when the tool converts the failure into a string result returned to the model.
+
+Content attributes such as `af.agent.input`, `af.agent.response`, `af.dynamic_session.code`, `af.dynamic_session.stdout`, and `af.dynamic_session.stderr` are off by default. Set `ENABLE_SENSITIVE_DATA=true` to include them; otherwise only metadata like byte and call counts is recorded. Keep this setting off in production to reduce the risk of capturing PII or other sensitive content.
+
+If `APPLICATIONINSIGHTS_CONNECTION_STRING` is set but the `[monitor]` extra is missing, the runtime logs a one-time warning asking you to install `azurefunctions-agents-runtime[monitor]`.
+
+Optionally, add `"telemetryMode": "OpenTelemetry"` to `src/host.json` to align Azure Functions host request telemetry with the runtime's spans under a single operation id. Runtime spans are recorded correctly even without this setting.
+
 ## Run locally
 
 Copy the sample local settings file and fill in values from a deployed environment:
