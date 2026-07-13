@@ -1,1 +1,1 @@
-azurefunctions-agents-runtime
+azurefunctions-agents-runtime[monitor]
